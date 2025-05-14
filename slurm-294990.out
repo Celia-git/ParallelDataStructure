@@ -1,0 +1,28 @@
+Running Makefile
+mpicc -Wall -c tester.cpp -o tester.o
+mpicc tester.o -lstdc++ -lmpi -o tester
+Running Script
+mpirun -np 4 ./tester
+
+Worker 3 ghost point vals:
+	Upper Ghost Row (from worker 2):
+		2 2 2 2 2 2 2 2 2 2 2 2  
+
+Worker 0 ghost point vals:
+	 Lower Ghost Row (from worker 1):
+		1 1 1 1 1 1 1 1 1 1 1 1  
+
+Worker 1 ghost point vals:
+	Upper Ghost Row (from worker 0):
+		0 0 0 0 0 0 0 0 0 0 0 0  
+	 Lower Ghost Row (from worker 2):
+		2 2 2 2 2 2 2 2 2 2 2 2  
+
+Worker 2 ghost point vals:
+	Upper Ghost Row (from worker 1):
+		1 1 1 1 1 1 1 1 1 1 1 1  
+	 Lower Ghost Row (from worker 3):
+		3 3 3 3 3 3 3 3 3 3 3 3  
+Clean
+rm -f tester tester.o 
+All Finished
