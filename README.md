@@ -1,6 +1,6 @@
 # Parallel Data Structure for Stencil Applications
 
-This assignment involves implementing a parallel data structure optimized for stencil applications. A stencil application calculates values in a 2D array, where each element's new value depends on its neighbors (north, east, south, west). This data structure efficiently manages data distribution and boundary communication between processing units (workers).
+This program implements a parallel data structure optimized for stencil applications. A stencil application calculates values in a 2D array, where each element's new value depends on its neighbors (north, east, south, west). This data structure efficiently manages data distribution and boundary communication between processing units (workers) using MPI.
 
 ## Data Structure Description
 
@@ -16,31 +16,41 @@ To facilitate stencil computations, each worker's local array includes "ghost po
 
 ## Implementation Details
 
-You are to write code that divides the global array `x` into equally sized slabs and copies the adjacent edge values to the neighboring workers.
+The code divides the global array `x` into equally sized slabs and copies the adjacent edge values to the neighboring workers.
 
-**Assumptions:**
+**Key Features:**
 
-* The global array is square (`maxn` x `maxn`).
-* `maxn` is evenly divisible by the number of workers.
-* The number of workers is fixed (or minimum).
-* Non-periodic boundaries:
-    * The top worker (rank = size - 1) communicates only with the worker below it (rank = size - 2).
-    * The bottom worker (rank = 0) communicates only with the worker above it (rank = size - 1).
+* Array division into equal-sized strips.
+* Exchange of adjacent edge data between neighboring workers.
+* Use of ghost points to store off-worker data.
+* Non-periodic boundary handling.
 
 **Communication:**
 
-* Use `MPI_Send` and `MPI_Recv` for communication between workers.
+* `MPI_Send` and `MPI_Recv` are used for communication between workers.
 
 **Testing:**
 
-1.  Each worker fills its local section of the array with its worker rank.
-2.  Each worker fills its ghost points with -1.
-3.  After the data exchange, verify that the ghost points contain the correct values from the neighboring workers.
-4.  Print the values of each worker's ghost rows.
+The `tester.cpp` file includes test code that:
+
+1.  Initializes each worker's local section of the array with its worker rank.
+2.  Initializes each worker's ghost points with -1.
+3.  Exchanges data with neighboring workers.
+4.  Verifies that the ghost points contain the correct values from the neighboring workers.
+5.  Prints the values of each worker's ghost rows.
 
 **Example:**
 
-For `maxn = 12` and `size = 4`, each worker's `xlocal` will be 12x3. Worker 0 will have ghost points for the data from worker 1. Worker 3 will have ghost points for the data from worker 2.
+For `maxn = 12` and `size = 4`, each worker's `xlocal` is 12x3. Worker 0 has ghost points for the data from worker 1. Worker 3 has ghost points for the data from worker 2.
+
+## Repository Contents
+
+The repository contains the following files:
+
+* `README.md`: This file.
+* `tester.cpp`: Contains the main function, test code, and program entry point.
+* `Makefile`: A `Makefile` for compiling the code.
+* `run.sh`: A bash script for running the program on a Linux-based scheduler (e.g., SLURM).
 
 ## Makefile Usage
 
@@ -74,9 +84,9 @@ The repository includes a `Makefile` to simplify the build process.
 
     (Replace `your_executable_name` with the actual name of your executable.)
 
-## run.sh Usage
+## `run.sh` Usage
 
-The directory also contains a `run.sh` script for running the tester on a Linux-based scheduler, such as SLURM. This script simplifies the process of submitting your job to the cluster.
+The repository also includes a `run.sh` script for running the program on a Linux-based scheduler, such as SLURM. This script simplifies the process of submitting your job to the cluster.
 
 **To use the script:**
 
@@ -87,11 +97,12 @@ The directory also contains a `run.sh` script for running the tester on a Linux-
     ```
 
 2.  Modify the script to match your cluster's specific configuration:
-    * **Specify the number of nodes/cores:** Adjust the `#SBATCH -n` or `#SBATCH --nodes` directives.
-    * **Set the job name:** Modify the `#SBATCH -J` directive.
-    * **Define the output file:** Change the `#SBATCH -o` directive.
-    * **Specify the partition (if required):** Uncomment and edit the `#SBATCH -p` directive.
-    * **Set any other necessary SLURM options.**
+
+    * Specify the number of nodes/cores using the `#SBATCH -n` or `#SBATCH --nodes` directives.
+    * Set the job name with the `#SBATCH -J` directive.
+    * Define the output file using the `#SBATCH -o` directive.
+    * Specify the partition (if required) by uncommenting and editing the `#SBATCH -p` directive.
+    * Set any other necessary SLURM options.
 
 3.  Submit the job to the scheduler:
 
@@ -99,24 +110,17 @@ The directory also contains a `run.sh` script for running the tester on a Linux-
     sbatch run.sh
     ```
 
-## Directory Structure
+## Prerequisites
 
+* An MPI installation (e.g., OpenMPI, MPICH).
+* A C compiler (e.g., gcc, clang).
+* A Linux-based system (for using the `run.sh` script with a scheduler).
 
-parallel_data_structure/
-|-- README.md
-|-- src/
-|   |-- data_structure.c       (Contains the data structure implementation)
-|   |-- data_structure.h       (Contains the data structure header file)
-|   |-- main.c                (Contains the main function and test code)
-|-- Makefile
-|-- run.sh                  (SLURM job submission script)
+## Compilation
 
+To compile the code, run the following command in the repository's root directory:
 
-## Important Considerations
-
-* Ensure your MPI environment is set up correctly.
-* The `Makefile` assumes a standard MPI installation (e.g., OpenMPI, MPICH). You may need to adjust compiler flags or library paths if your setup is different.
-* This implementation uses blocking `MPI_Send` and `MPI_Recv`. For very large arrays, you might consider non-blocking communication for better performance.
-* Error handling (checking the return values of MPI functions) is crucial for robust code.
-* The `run.sh` script is a template and will likely require modifications to work correctly on your specific cluster.  Consult your cluster's documentation for details on SLURM parameters.
-
+```bash
+make all
+This will compile the source files and create an executable.Running the CodeTo run the compiled executable, use the following command:mpiexec -n <number_of_processes> ./tester
+Replace <number_of_processes> with the number of MPI processes you want to use
